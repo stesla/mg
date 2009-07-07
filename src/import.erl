@@ -21,21 +21,23 @@ from_io(Io, Fun) ->
 
 parse(Data) ->
   Tokens = string:tokens(Data, " \t\n"),
-  transform(list_to_tuple([tag | Tokens])).
+  transform(Tokens).
 
-transform(T) ->
-  T#tag{
-    position = erlang:list_to_integer(T#tag.position),
-    strand = case T#tag.strand of
+transform([Sequence, Chromosome, Position, Strand, Length, Repeat, Mmei]) ->
+  #tag{
+    sequence = Sequence,
+    chromosome = Chromosome,
+    position = erlang:list_to_integer(Position),
+    strand = case Strand of
                "-" -> up;
                "+" -> down
              end,
-    length = erlang:list_to_integer(T#tag.length),
-    repeat = case T#tag.repeat of
+    length = erlang:list_to_integer(Length),
+    repeat = case Repeat of
                "0" -> false;
                "1" -> true
              end,
-    mmei = case T#tag.mmei of
+    mmei = case Mmei of
              "NA" -> no;
              Number -> {yes, erlang:list_to_integer(Number)}
            end}.
