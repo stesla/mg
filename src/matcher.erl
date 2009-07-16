@@ -3,7 +3,7 @@
 -behaviour(gen_server).
 
 %% API
--export([add_sequence/1, start_link/0]).
+-export([add/1, match/2, start_link/0]).
 
 %% gen_server callbacks
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2,
@@ -24,8 +24,11 @@
 start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
-add_sequence(Seq) ->
-  gen_server:call(?SERVER, {add_sequence, Seq}).
+add(Seq) ->
+  gen_server:call(?SERVER, {add, Seq}).
+
+match(Seq, Degree) ->
+  gen_server:call(?SERVER, {match, Seq, Degree}).
 
 %%====================================================================
 %% gen_server callbacks
@@ -51,10 +54,21 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
-handle_call({add_sequence, Seq}, _From, State) ->
+handle_call({add, Seq}, _From, State) ->
+  %% TODO: Remove magic numbers.
   L1 = mg_util:combinations(Seq, 1),
   L2 = mg_util:combinations(Seq, 2),
   Reply = ets:insert(?TABLE, [{X, Seq} || X <- L1++L2]),
+  {reply, Reply, State};
+
+handle_call({match, Seq, Degree}, _From, State) ->
+  Cs = mg_util:combinations(Seq, Degree),
+  Ms = lists:foldl(fun(C, Acc) ->
+                       ets:lookup(?TABLE, C) ++ Acc
+                   end, [], Cs),
+  Reply = length(lists:filter(fun(Elt) -> 
+                                  mg_util:is_mutation(Seq, Elt)
+                              end, Ms)),
   {reply, Reply, State};
 
 handle_call(_Request, _From, State) ->
