@@ -3,6 +3,7 @@
 -behaviour(gen_server).
 
 %% API
+-export([insert/1,lookup/1]).
 -export([start_link/0]).
 
 %% gen_server callbacks
@@ -18,6 +19,18 @@
 %%====================================================================
 start_link() ->
   gen_server:start_link({local, ?MODULE}, ?MODULE, [], []).
+
+insert(Record = {_Key, _Sequence}) ->
+  gen_server:call(?MODULE, {insert, Record});
+insert(Records = [{_Key, _Sequence}|_]) ->
+  %% I'm willing to assume that if the first element is a tuple of the
+  %% shape we like, then the rest are.
+  gen_server:call(?MODULE, {insert, Records});
+insert([]) ->
+  ok.
+
+lookup(Key) ->
+  ets:lookup(?TABLE, Key).
 
 %%====================================================================
 %% gen_server callbacks
@@ -43,6 +56,10 @@ init([]) ->
 %%                                      {stop, Reason, State}
 %% Description: Handling call messages
 %%--------------------------------------------------------------------
+handle_call({insert, ObjectOrObjects}, _From, State) ->
+  true = ets:insert(?TABLE, ObjectOrObjects),
+  {reply, ok, State};
+
 handle_call(_Request, _From, State) ->
   Reply = ok,
   {reply, Reply, State}.
