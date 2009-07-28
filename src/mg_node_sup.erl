@@ -48,7 +48,8 @@ supervisor_flags() ->
   {RestartStrategy, MaxRetries, RetryInterval}.
 
 children() ->
-  [].
+  Storage = storage_spec(),
+  [Storage].
 
 %% child_spec(Args) ->
 %%   Name = NAME,
@@ -58,3 +59,12 @@ children() ->
 %%   Modules = [MODULES],
 %%   Type = supervisor,
 %%   {Name, StartFunc, Restart, Shutdown, Type, Modules}.
+
+storage_spec() ->
+  Name = mg_node_storage,
+  StartFunc = {mg_node_storage, start_link, []},
+  Restart = permanent,
+  Shutdown = brutal_kill,
+  Modules = [mg_node_storage],
+  Type = worker,
+  {Name, StartFunc, Restart, Shutdown, Type, Modules}.
