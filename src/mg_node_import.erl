@@ -1,9 +1,17 @@
--module(import).
+-module(mg_node_import).
 
 -export([from_file/2]).
 
--include("tag.hrl").
-
+-record(tag, {
+          sequence,   % string()
+          chromosome, % string()
+          position,   % integer()
+          strand,     % up | down
+          length,     % integer()
+          repeat,     % true | false
+          mmei        % no | {yes, integer()}
+          }).
+        
 from_file(File, Fun) ->
   {ok, Io} = file:open(File, [read]),
   from_io(Io, Fun).
