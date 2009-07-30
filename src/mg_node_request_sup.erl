@@ -1,4 +1,4 @@
--module(mg_node_sup).
+-module(mg_node_request_sup).
 
 -behaviour(supervisor).
 
@@ -31,7 +31,7 @@ start_link() ->
 %% specifications.
 %%--------------------------------------------------------------------
 init([]) ->
-  RestartStrategy = one_for_all,
+  RestartStrategy = simple_one_for_one,
   MaxRetries = 10,
   RetryInterval = 3600,
   Children = children(),
@@ -42,24 +42,14 @@ init([]) ->
 %%====================================================================
 
 children() ->
-  Storage = storage_spec(),
-  RequestSup = request_sup_spec(),
-  [Storage, RequestSup].
+  Query = query_spec(),
+  [Query].
 
-storage_spec() ->
-  Name = mg_node_storage,
-  StartFunc = {mg_node_storage, start_link, []},
-  Restart = permanent,
-  Shutdown = brutal_kill,
-  Modules = [mg_node_storage],
-  Type = worker,
-  {Name, StartFunc, Restart, Shutdown, Type, Modules}.
-
-request_sup_spec() ->
-  Name = mg_node_request_sup,
-  StartFunc = {mg_node_request_sup, start_link, []},
+query_spec() ->
+  Name = mg_node_query_sup,
+  StartFunc = {mg_node_query_sup, start_link, []},
   Restart = permanent,
   Shutdown = infinity,
-  Modules = [mg_node_request_sup],
+  Modules = [mg_node_query_sup],
   Type = supervisor,
-  {Name, StartFunc, Restart, Shutdown, Type, Modules}.  
+  {Name, StartFunc, Restart, Shutdown, Type, Modules}.

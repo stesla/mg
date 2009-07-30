@@ -1,4 +1,4 @@
--module(mg_node_sup).
+-module(mg_node_worker_sup).
 
 -behaviour(supervisor).
 
@@ -16,7 +16,7 @@
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
 start_link() ->
-  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
+  supervisor:start_link(?MODULE, []).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -31,7 +31,7 @@ start_link() ->
 %% specifications.
 %%--------------------------------------------------------------------
 init([]) ->
-  RestartStrategy = one_for_all,
+  RestartStrategy = simple_one_for_one,
   MaxRetries = 10,
   RetryInterval = 3600,
   Children = children(),
@@ -42,24 +42,14 @@ init([]) ->
 %%====================================================================
 
 children() ->
-  Storage = storage_spec(),
-  RequestSup = request_sup_spec(),
-  [Storage, RequestSup].
+  Worker = worker_spec(),
+  [Worker].
 
-storage_spec() ->
-  Name = mg_node_storage,
-  StartFunc = {mg_node_storage, start_link, []},
+worker_spec() ->
+  Name = undefined,
+  StartFunc = {mg_node_worker, start_link, []},
   Restart = permanent,
   Shutdown = brutal_kill,
-  Modules = [mg_node_storage],
+  Modules = [mg_node_worker],
   Type = worker,
   {Name, StartFunc, Restart, Shutdown, Type, Modules}.
-
-request_sup_spec() ->
-  Name = mg_node_request_sup,
-  StartFunc = {mg_node_request_sup, start_link, []},
-  Restart = permanent,
-  Shutdown = infinity,
-  Modules = [mg_node_request_sup],
-  Type = supervisor,
-  {Name, StartFunc, Restart, Shutdown, Type, Modules}.  
