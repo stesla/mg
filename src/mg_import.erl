@@ -1,4 +1,4 @@
--module(mg_node_import).
+-module(mg_import).
 
 -export([from_file/2]).
 

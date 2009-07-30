@@ -1,4 +1,4 @@
--module(mg_node_util).
+-module(mg_util).
 
 -export([combinations/2, is_mutation/2]).
 

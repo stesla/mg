@@ -1,4 +1,4 @@
--module(mg_node_storage).
+-module(mg_storage).
 
 -behaviour(gen_server).
 

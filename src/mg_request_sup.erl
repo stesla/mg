@@ -1,4 +1,4 @@
--module(mg_node_worker_sup).
+-module(mg_request_sup).
 
 -behaviour(supervisor).
 
@@ -16,7 +16,7 @@
 %% Description: Starts the supervisor
 %%--------------------------------------------------------------------
 start_link() ->
-  supervisor:start_link(?MODULE, []).
+  supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
 %%====================================================================
 %% Supervisor callbacks
@@ -42,14 +42,14 @@ init([]) ->
 %%====================================================================
 
 children() ->
-  Worker = worker_spec(),
-  [Worker].
+  Query = query_spec(),
+  [Query].
 
-worker_spec() ->
-  Name = undefined,
-  StartFunc = {mg_node_worker, start_link, []},
+query_spec() ->
+  Name = mg_query_sup,
+  StartFunc = {mg_query_sup, start_link, []},
   Restart = permanent,
-  Shutdown = brutal_kill,
-  Modules = [mg_node_worker],
-  Type = worker,
+  Shutdown = infinity,
+  Modules = [mg_query_sup],
+  Type = supervisor,
   {Name, StartFunc, Restart, Shutdown, Type, Modules}.
