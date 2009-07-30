@@ -7,8 +7,7 @@
              mg_node_import,
              mg_node_sup,
              mg_node_util]},
-  {registered, [mg_node_storage,
-                mg_node_sup]},
+  {registered, []},
   {applications, [kernel, stdlib]},
   {env, []},
   {mod, {mg_node_app, []}}]}.
